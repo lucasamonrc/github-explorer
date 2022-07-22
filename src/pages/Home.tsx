@@ -7,6 +7,7 @@ import { Repository } from '../components/Repository';
 import { Autocomplete } from '../components/Autocomplete';
 
 interface Repo {
+  id: string;
   full_name: string;
   owner: {
     avatar_url: string;
@@ -90,10 +91,11 @@ export function Home() {
       <div className="w-3/4 flex flex-col items-center justify-start gap-4">
         {repositories.map((repo) => (
           <Repository
-            key={repo.full_name}
+            key={repo.id}
             avatar={repo.owner.avatar_url}
             repo={repo.full_name}
             description={repo.description}
+            url={`/repo/${repo.id}`}
           />
         ))}
       </div>

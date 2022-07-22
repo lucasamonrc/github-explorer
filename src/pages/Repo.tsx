@@ -1,26 +1,73 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { GitFork, Star, WarningCircle } from 'phosphor-react';
 
 import { Header } from '../components/Header';
 import { Repository } from '../components/Repository';
+import api from '../lib/api';
+
+interface Repository {
+  full_name: string;
+  owner: {
+    avatar_url: string;
+  };
+  description: string;
+  forks: number;
+  open_issues: number;
+  stargazers_count: number;
+}
+
+interface Issue {
+  title: string;
+  html_url: string;
+}
 
 export function RepoPage() {
+  const { repoId } = useParams();
+
+  const [repository, setRepository] = useState<Repository | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
+
+  useEffect(() => {
+    async function queryRepo() {
+      try {
+        const { data: repo } = await api.get<Repository>(
+          `/repositories/${repoId}`
+        );
+        const { data: issues } = await api.get<Issue[]>(
+          `/repositories/${repoId}/issues?per_page=10`
+        );
+
+        setRepository(repo);
+        setIssues(issues);
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error(err.message);
+        }
+      }
+    }
+
+    if (!repository) {
+      queryRepo();
+    }
+  }, []);
+
   return (
     <div className="max-w-5xl w-full mx-auto mb-16 py-8 bg-watermark bg-no-repeat">
       <Header back />
 
       <div className="flex gap-4 items-center w-3/4 mb-10">
         <img
-          src="https://github.com/lucasamonrc.png"
+          src={repository?.owner.avatar_url}
           alt=""
           className="rounded-full w-28"
         />
         <div>
           <strong className="block font-bold text-4xl text-texts-dark mb-3">
-            lucasamonrc/github-explorer
+            {repository?.full_name}
           </strong>
-          <small className="block text-xl text-texts-medium line-clamp">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Natus,
-            fugiat!
+          <small className="block text-xl text-texts-medium">
+            {repository?.description}
           </small>
         </div>
       </div>
@@ -31,7 +78,9 @@ export function RepoPage() {
             <Star />
             Stars
           </small>
-          <strong className="block text-4xl text-texts-dark">1808</strong>
+          <strong className="block text-4xl text-texts-dark">
+            {repository?.stargazers_count}
+          </strong>
         </div>
 
         <div>
@@ -39,7 +88,9 @@ export function RepoPage() {
             <GitFork />
             Forks
           </small>
-          <strong className="block text-4xl text-texts-dark">10</strong>
+          <strong className="block text-4xl text-texts-dark">
+            {repository?.forks}
+          </strong>
         </div>
 
         <div>
@@ -47,12 +98,21 @@ export function RepoPage() {
             <WarningCircle />
             Issues
           </small>
-          <strong className="block text-4xl text-texts-dark">100</strong>
+          <strong className="block text-4xl text-texts-dark">
+            {repository?.open_issues}
+          </strong>
         </div>
       </div>
 
       <div className="w-3/4 flex flex-col items-center justify-start gap-4">
-        <Repository key="1" repo="Issue name" description="author" />
+        {issues.map((issue, i) => (
+          <Repository
+            key={i}
+            repo={issue.title}
+            url={issue.html_url}
+            external
+          />
+        ))}
       </div>
     </div>
   );
