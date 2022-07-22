@@ -25,7 +25,7 @@ export function Home() {
         <Repository
           avatar="https://github.com/lucasamonrc.png"
           repo="lucasamonrc/something"
-          description="just a simple repositoryaaaaaaaaaaaaa"
+          description="just a simple repository"
         />
       </div>
     </div>
