@@ -1,63 +1,101 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 
 import logo from '../assets/github-explorer.svg';
 import { Repository } from '../components/Repository';
 import api from '../lib/api';
 import useDebounce from '../hooks/useDebounce';
+import { Autocomplete } from '../components/Autocomplete';
+
+interface Repo {
+  full_name: string;
+  owner: {
+    avatar_url: string;
+  };
+  description: string;
+}
 
 export function Home() {
   const [username, setUsername] = useState('');
+  const [usernames, setUsernames] = useState<string[]>([]);
+  const [repositories, setRepositories] = useState<Repo[]>([]);
 
   const searchUser = useDebounce(
     async (username: string) => {
+      if (!username) {
+        setUsernames([]);
+        return;
+      }
+
       try {
         const { data } = await api.get(
           `/search/users?q=${username}&per_page=5`
         );
-        console.log(data.items);
+
+        const newUsernames = data.items.map(
+          (item: { login: string }) => item.login
+        );
+
+        setUsernames(newUsernames);
       } catch (err) {
         if (err instanceof Error) {
           console.error(err.message);
         }
       }
     },
-    500,
+    1000,
     []
   );
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleQuery = (event: ChangeEvent<HTMLInputElement>) => {
     const newUsername = event.target.value;
-    setUsername(newUsername);
     newUsername && searchUser(newUsername);
   };
 
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    try {
+      const { data } = await api.get<Repo[]>(`/users/${username}/repos`);
+      setRepositories(data);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
+    }
+  };
+
   return (
-    <div className="max-w-5xl w-full mx-auto py-8 bg-watermark bg-no-repeat">
+    <div className="max-w-5xl w-full mx-auto mb-16 py-8 bg-watermark bg-no-repeat">
       <img src={logo} className="mb-24" />
 
       <h1 className="text-texts-dark text-5xl font-bold max-w-md leading-snug mb-10">
         Explore repositories on GitHub.
       </h1>
 
-      <form className="mb-32 w-3/4 flex gap-1">
-        <input
-          type="text"
-          placeholder="Type the author or organization..."
+      <form className="mb-32 w-3/4 flex gap-1" onSubmit={handleSubmit}>
+        <Autocomplete
           value={username}
-          onChange={handleChange}
-          className="bg-white rounded py-6 px-7 text-xl leading-6 placeholder:text-texts-light flex-1"
+          onChange={setUsername}
+          usernames={usernames}
+          onQuery={handleQuery}
         />
-        <button className="bg-success rounded py-5 px-16 font-bold text-lg text-white hover:brightness-90 transition">
+        <button
+          type="submit"
+          className="bg-success rounded py-5 px-16 font-bold text-lg text-white hover:brightness-90 transition self-start"
+        >
           Search
         </button>
       </form>
 
       <div className="w-3/4 flex flex-col items-center justify-start gap-4">
-        <Repository
-          avatar="https://github.com/lucasamonrc.png"
-          repo="lucasamonrc/something"
-          description="just a simple repository"
-        />
+        {repositories.map((repo) => (
+          <Repository
+            key={repo.full_name}
+            avatar={repo.owner.avatar_url}
+            repo={repo.full_name}
+            description={repo.description}
+          />
+        ))}
       </div>
     </div>
   );
