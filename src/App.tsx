@@ -15,6 +15,7 @@ function App() {
             <Route path=":repoId" element={<RepoPage />} />
           </Route>
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
