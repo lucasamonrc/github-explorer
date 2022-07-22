@@ -1,9 +1,9 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 
-import logo from '../assets/github-explorer.svg';
-import { Repository } from '../components/Repository';
 import api from '../lib/api';
 import useDebounce from '../hooks/useDebounce';
+import logo from '../assets/github-explorer.svg';
+import { Repository } from '../components/Repository';
 import { Autocomplete } from '../components/Autocomplete';
 
 interface Repo {
