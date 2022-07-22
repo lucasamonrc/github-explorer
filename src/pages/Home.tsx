@@ -1,8 +1,8 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 
 import api from '../lib/api';
+import { Header } from '../components/Header';
 import useDebounce from '../hooks/useDebounce';
-import logo from '../assets/github-explorer.svg';
 import { Repository } from '../components/Repository';
 import { Autocomplete } from '../components/Autocomplete';
 
@@ -66,7 +66,7 @@ export function Home() {
 
   return (
     <div className="max-w-5xl w-full mx-auto mb-16 py-8 bg-watermark bg-no-repeat">
-      <img src={logo} className="mb-24" />
+      <Header />
 
       <h1 className="text-texts-dark text-5xl font-bold max-w-md leading-snug mb-10">
         Explore repositories on GitHub.

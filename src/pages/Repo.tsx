@@ -1,18 +1,12 @@
-import { CaretLeft, GitFork, Star, WarningCircle } from 'phosphor-react';
+import { GitFork, Star, WarningCircle } from 'phosphor-react';
 
-import logo from '../assets/github-explorer.svg';
+import { Header } from '../components/Header';
 import { Repository } from '../components/Repository';
 
 export function RepoPage() {
   return (
     <div className="max-w-5xl w-full mx-auto mb-16 py-8 bg-watermark bg-no-repeat">
-      <header className="mb-24 flex justify-between items-center">
-        <img src={logo} />
-        <span className="flex gap-1 justify-end items-center text-texts-light text-lg">
-          <CaretLeft size={18} weight="bold" />
-          back
-        </span>
-      </header>
+      <Header back />
 
       <div className="flex gap-4 items-center w-3/4 mb-10">
         <img
